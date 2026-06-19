@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { 
   LayoutDashboard, Users, UserSquare2, BookOpen, 
   FileText, Receipt, Folder, Bell, BarChart3, 
-  Settings, LogOut, Menu, X, Search, User
+  Settings, LogOut, Menu, X, Search, User, Info
 } from 'lucide-react'
 import { HAS_BACKEND } from '../config'
 import Toast, { ToastMessage } from './Toast'

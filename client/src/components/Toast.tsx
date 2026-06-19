@@ -10,24 +10,21 @@ export interface ToastMessage {
 }
 
 interface ToastProps {
-  toasts: ToastMessage[]
-  removeToast: (id: string) => void
+  message: string
+  type: ToastType
+  onClose: () => void
 }
 
-export default function Toast({ toasts, removeToast }: ToastProps) {
+export default function Toast({ message, type, onClose }: ToastProps) {
   return (
-    <div className="toast-container">
-      {toasts.map(toast => (
-        <div key={toast.id} className="toast" style={{ borderLeftColor: toast.type === 'success' ? 'var(--success)' : toast.type === 'error' ? 'var(--danger)' : 'var(--info)' }}>
-          {toast.type === 'success' && <CheckCircle size={20} color="var(--success)" />}
-          {toast.type === 'error' && <AlertCircle size={20} color="var(--danger)" />}
-          {toast.type === 'info' && <Info size={20} color="var(--info)" />}
-          <span style={{ flex: 1, fontSize: '0.875rem', fontWeight: 500 }}>{toast.message}</span>
-          <button onClick={() => removeToast(toast.id)} className="icon-btn" style={{ padding: '4px' }}>
-            <X size={16} />
-          </button>
-        </div>
-      ))}
+    <div className="toast" style={{ borderLeftColor: type === 'success' ? 'var(--success, #10b981)' : type === 'error' ? 'var(--danger, #ef4444)' : 'var(--info, #3b82f6)' }}>
+      {type === 'success' && <CheckCircle size={20} color="var(--success, #10b981)" />}
+      {type === 'error' && <AlertCircle size={20} color="var(--danger, #ef4444)" />}
+      {type === 'info' && <Info size={20} color="var(--info, #3b82f6)" />}
+      <span style={{ flex: 1, fontSize: '0.875rem', fontWeight: 500 }}>{message}</span>
+      <button onClick={onClose} className="icon-btn" style={{ padding: '4px' }}>
+        <X size={16} />
+      </button>
     </div>
   )
 }

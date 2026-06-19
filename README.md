@@ -8,3 +8,5 @@ The online site is a demo running with local data. This code is the complete, pr
 - Accounts for: Supabase, Stripe, SendGrid, Anthropic, Google Cloud (Gemini, OAuth), Apple Developer.
 
 ## Installation
+
+1. Install backend dependencies:

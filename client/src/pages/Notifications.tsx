@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Bell, Check, Trash2, Info, AlertCircle, CheckCircle } from 'lucide-react'
-import { useToast } from '../components/DashboardLayout'
+import { useOutletContext } from 'react-router-dom'
 
 interface Notification {
   id: string
@@ -12,7 +12,7 @@ interface Notification {
 }
 
 export default function Notifications() {
-  const { addToast } = useToast()
+  const { addToast } = useOutletContext<{ addToast: (msg: string, type?: 'success'|'error'|'info') => void }>()
   const [notifications, setNotifications] = useState<Notification[]>([
     { id: '1', title: 'Nuovo iscritto', message: 'Mario Rossi si è iscritto al corso React Avanzato.', time: '10 min fa', read: false, type: 'success' },
     { id: '2', title: 'Fattura pagata', message: 'La fattura FATT-2023-001 è stata saldata.', time: '1 ora fa', read: false, type: 'success' },
@@ -27,13 +27,14 @@ export default function Notifications() {
 
   const deleteNotification = (id: string) => {
     setNotifications(notifications.filter(n => n.id !== id))
+    addToast('Notifica eliminata', 'info')
   }
 
   const getIcon = (type: Notification['type']) => {
     switch(type) {
-      case 'info': return <Info size={20} color="var(--info)" />
-      case 'warning': return <AlertCircle size={20} color="var(--warning)" />
-      case 'success': return <CheckCircle size={20} color="var(--success)" />
+      case 'info': return <Info size={20} color="var(--info, #3b82f6)" />
+      case 'warning': return <AlertCircle size={20} color="var(--warning, #f59e0b)" />
+      case 'success': return <CheckCircle size={20} color="var(--success, #10b981)" />
     }
   }
 
@@ -67,20 +68,26 @@ export default function Notifications() {
                 alignItems: 'flex-start', 
                 gap: '16px', 
                 padding: '20px', 
-                borderBottom: index !== notifications.length - 1 ? '1px solid var(--border-color)' : 'none',
-                backgroundColor: notif.read ? 'transparent' : 'var(--bg-surface-hover)'
+                borderBottom: index !== notifications.length - 1 ? '1px solid var(--border)' : 'none',
+                backgroundColor: notif.read ? 'transparent' : 'rgba(var(--accent-rgb, 251, 0, 255), 0.05)'
               }}
             >
-              <div style={{ marginTop: '2px' }}>{getIcon(notif.type)}</div>
+              <div style={{ marginTop: '2px' }}>
+                {getIcon(notif.type)}
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <h4 style={{ fontWeight: notif.read ? 500 : 600 }}>{notif.title}</h4>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{notif.time}</span>
+                  <h4 style={{ margin: 0, fontWeight: notif.read ? 500 : 600 }}>{notif.title}</h4>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{notif.time}</span>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{notif.message}</p>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{notif.message}</p>
               </div>
-              <button className="icon-btn" onClick={() => deleteNotification(notif.id)}>
-                <Trash2 size={18} color="var(--text-secondary)" />
+              <button 
+                className="icon-btn text-danger"
+                onClick={() => deleteNotification(notif.id)}
+                title="Elimina notifica"
+              >
+                <Trash2 size={18} />
               </button>
             </div>
           ))}

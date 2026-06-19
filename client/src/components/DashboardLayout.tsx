@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation, useOutletContext } from 'react-router-dom'
 import { 
   LayoutDashboard, Users, UserSquare2, BookOpen, 
   FileText, Receipt, Folder, Bell, BarChart3, 
@@ -7,6 +7,14 @@ import {
 } from 'lucide-react'
 import { HAS_BACKEND } from '../config'
 import Toast, { ToastMessage } from './Toast'
+
+export type ToastContextType = {
+  addToast: (message: string, type?: 'success' | 'error' | 'info') => void
+}
+
+export function useToast() {
+  return useOutletContext<ToastContextType>()
+}
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -37,10 +45,8 @@ export default function DashboardLayout() {
     setToasts(prev => prev.filter(t => t.id !== id))
   }
 
-  // Passiamo addToast a tutte le rotte figlie tramite context
   return (
     <div className="app-layout">
-      {/* Sidebar Overlay for Mobile */}
       {sidebarOpen && (
         <div 
           className="modal-overlay" 
@@ -49,7 +55,6 @@ export default function DashboardLayout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <BookOpen className="sidebar-logo-icon" size={28} />
@@ -79,97 +84,69 @@ export default function DashboardLayout() {
           })}
         </nav>
 
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)' }}>
-          <div 
-            className={`nav-item ${location.pathname === '/app/settings' ? 'active' : ''}`}
-            onClick={() => { navigate('/app/settings'); setSidebarOpen(false); }}
-          >
+        <div className="sidebar-footer">
+          <div className="nav-item" onClick={() => navigate('/app/settings')}>
             <Settings size={20} />
             <span>Impostazioni</span>
           </div>
-          <div 
-            className="nav-item"
-            onClick={() => navigate('/')}
-            style={{ color: 'var(--danger)' }}
-          >
+          <div className="nav-item" onClick={() => navigate('/')}>
             <LogOut size={20} />
             <span>Esci</span>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="main-content">
         {!HAS_BACKEND && (
           <div className="demo-banner">
             <Info size={16} />
-            <span>Modalità Demo: i dati sono salvati localmente. Configura il backend per attivare database e pagamenti reali.</span>
+            <span>Modalità demo - i dati sono locali. Configura il backend per attivare le funzionalità complete.</span>
           </div>
         )}
 
-        <header className="top-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <header className="header">
+          <div className="header-left">
             <button className="icon-btn mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
               <Menu size={24} />
             </button>
-            <h1 className="header-title">
-              {navItems.find(i => i.path === location.pathname)?.label || 
-               (location.pathname === '/app/settings' ? 'Impostazioni' : 
-                location.pathname === '/app/profile' ? 'Profilo' : '')}
-            </h1>
+            <div className="search-bar">
+              <Search size={18} color="var(--text-secondary)" />
+              <input type="text" placeholder="Cerca..." />
+            </div>
           </div>
 
-          <div className="header-actions">
-            <div style={{ position: 'relative', display: 'none' }} className="desktop-search">
-              <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input type="text" placeholder="Cerca..." style={{ paddingLeft: '36px', width: '200px', borderRadius: '999px' }} />
-            </div>
-            
+          <div className="header-right">
             <button className="icon-btn" onClick={() => navigate('/app/notifications')}>
               <Bell size={20} />
+              <span className="badge">3</span>
             </button>
-
-            <div style={{ position: 'relative' }}>
+            
+            <div className="profile-menu-container">
               <button 
-                className="icon-btn" 
-                style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)' }}
+                className="profile-btn" 
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
-                <User size={20} />
+                <div className="avatar">
+                  <User size={20} />
+                </div>
+                <span className="profile-name">Admin</span>
               </button>
 
               {showProfileMenu && (
-                <div 
-                  style={{ 
-                    position: 'absolute', top: '100%', right: 0, marginTop: '8px', 
-                    backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)',
-                    width: '200px', zIndex: 50, overflow: 'hidden'
-                  }}
-                >
-                  <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
-                    <div style={{ fontWeight: 600 }}>Admin Demo</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>admin@skillforge.com</div>
+                <div className="profile-dropdown">
+                  <div className="dropdown-header">
+                    <strong>Admin User</strong>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>admin@skillforge.com</span>
                   </div>
-                  <div 
-                    className="nav-item" 
-                    style={{ borderRadius: 0, padding: '12px 16px' }}
-                    onClick={() => { navigate('/app/profile'); setShowProfileMenu(false); }}
-                  >
+                  <div className="dropdown-divider"></div>
+                  <div className="dropdown-item" onClick={() => { navigate('/app/settings'); setShowProfileMenu(false); }}>
                     <User size={16} /> Profilo
                   </div>
-                  <div 
-                    className="nav-item" 
-                    style={{ borderRadius: 0, padding: '12px 16px' }}
-                    onClick={() => { navigate('/app/settings'); setShowProfileMenu(false); }}
-                  >
+                  <div className="dropdown-item" onClick={() => { navigate('/app/settings'); setShowProfileMenu(false); }}>
                     <Settings size={16} /> Impostazioni
                   </div>
-                  <div 
-                    className="nav-item" 
-                    style={{ borderRadius: 0, padding: '12px 16px', color: 'var(--danger)' }}
-                    onClick={() => navigate('/')}
-                  >
+                  <div className="dropdown-divider"></div>
+                  <div className="dropdown-item text-danger" onClick={() => navigate('/')}>
                     <LogOut size={16} /> Esci
                   </div>
                 </div>
@@ -178,17 +155,21 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <div className="page-container">
-          <Outlet context={{ addToast }} />
+        <div className="content-area">
+          <Outlet context={{ addToast } satisfies ToastContextType} />
         </div>
       </main>
 
-      <Toast toasts={toasts} removeToast={removeToast} />
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <Toast 
+            key={toast.id} 
+            message={toast.message} 
+            type={toast.type} 
+            onClose={() => removeToast(toast.id)} 
+          />
+        ))}
+      </div>
     </div>
   )
-}
-
-// Hook helper per usare i toast nelle pagine
-export function useToast() {
-  return React.useContext(React.createContext<{addToast: (msg: string, type?: 'success'|'error'|'info') => void}>({ addToast: () => {} }))
 }
